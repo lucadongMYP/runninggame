@@ -1,1 +1,69 @@
+let jumpCount = 0;
+const MAX_JUMPS = 2;
 
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && jumpCount < MAX_JUMPS && !gameOver) {
+    player.classList.remove("jump");
+    void player.offsetWidth; // reset animation
+    player.classList.add("jump");
+    jumpCount++;
+  }
+});
+
+player.addEventListener("animationend", () => {
+  jumpCount = 0;
+});
+let shield = false;
+let shieldTimer = 0;
+
+function spawnPowerUp() {
+  const p = document.createElement("div");
+  p.className = "powerup";
+  p.style.left = "800px";
+  game.appendChild(p);
+
+  const move = setInterval(() => {
+    if (gameOver) return clearInterval(move);
+
+    let x = parseInt(p.style.left);
+    p.style.left = x - speed + "px";
+
+    const pr = player.getBoundingClientRect();
+    const pu = p.getBoundingClientRect();
+
+    if (
+      pu.left < pr.right &&
+      pu.right > pr.left &&
+      pu.bottom > pr.top &&
+      pu.top < pr.bottom
+    ) {
+      shield = true;
+      shieldTimer = 300;
+      player.classList.add("shield");
+      p.remove();
+      clearInterval(move);
+    }
+
+    if (x < -20) {
+      p.remove();
+      clearInterval(move);
+    }
+  }, 20);
+}
+
+setInterval(() => {
+  if (!gameOver && Math.random() < 0.01) spawnPowerUp();
+}, 1000);
+
+setInterval(() => {
+  if (shield) {
+    shieldTimer--;
+    if (shieldTimer <= 0) {
+      shield = false;
+      player.classList.remove("shield");
+    }
+  }
+}, 100);
+setInterval(() => {
+  game.classList.toggle("night");
+}, 15000);
