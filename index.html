@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HTML Runner Game</title>
+
+<style>
+  body {
+    margin: 0;
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: monospace;
+    color: white;
+  }
+
+  #game {
+    position: relative;
+    width: 800px;
+    height: 250px;
+    background: #222;
+    overflow: hidden;
+    border: 3px solid #555;
+  }
+
+  #ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 10px;
+    background: #555;
+  }
+
+  #player {
+    position: absolute;
+    bottom: 10px;
+    left: 80px;
+    width: 30px;
+    height: 40px;
+    background: lime;
+  }
+
+  .obstacle {
+    position: absolute;
+    bottom: 10px;
+    width: 20px;
+    height: 30px;
+    background: red;
+  }
+
+  #ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 14px;
+  }
+
+  .jump {
+    animation: jump 0.6s ease-out;
+  }
+
+  @keyframes jump {
+    0%   { bottom: 10px; }
+    50%  { bottom: 100px; }
+    100% { bottom: 10px; }
+  }
+</style>
+</head>
+
+<body>
+
+<div id="game">
+  <div id="ui">
+    Score: <span id="score">0</span><br>
+    High: <span id="high">0</span>
+  </div>
+
+  <div id="player"></div>
+  <div id="ground"></div>
+</div>
+
+<script>
+  const game = document.getElementById("game");
+  const player = document.getElementById("player");
+  const scoreEl = document.getElementById("score");
+  const highEl = document.getElementById("high");
+
+  let score = 0;
+  let speed = 4;
+  let gameOver = false;
+  let highScore = localStorage.getItem("htmlRunnerHigh") || 0;
+  highEl.textContent = highScore;
+
+  // Jump
+  document.addEventListener("keydown", e => {
+    if (e.code === "Space" && !player.classList.contains("jump")) {
+      player.classList.add("jump");
+      setTimeout(() => player.classList.remove("jump"), 600);
+    }
+    if (gameOver) location.reload();
+  });
+
+  // Spawn obstacles
+  function spawnObstacle() {
+    if (gameOver) return;
+
+    const obs = document.createElement("div");
+    obs.className = "obstacle";
+    obs.style.left = "800px";
+    game.appendChild(obs);
+
+    let move = setInterval(() => {
+      if (gameOver) {
+        clearInterval(move);
+        return;
+      }
+
+      let x = parseInt(obs.style.left);
+      obs.style.left = (x - speed) + "px";
+
+      // Collision detection
+      const playerRect = player.getBoundingClientRect();
+      const obsRect = obs.getBoundingClientRect();
+
+      if (
+        obsRect.left < playerRect.right &&
+        obsRect.right > playerRect.left &&
+        obsRect.bottom > playerRect.top &&
+        obsRect.top < playerRect.bottom
+      ) {
+        gameOver = true;
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem("htmlRunnerHigh", highScore);
+        }
+        alert("GAME OVER — Press Space to Restart");
+      }
+
+      if (x < -20) {
+        obs.remove();
+        clearInterval(move);
+      }
+    }, 20);
+
+    setTimeout(spawnObstacle, 1500 - speed * 100);
+  }
+
+  // Score loop
+  setInterval(() => {
+    if (!gameOver) {
+      score++;
+      scoreEl.textContent = score;
+      if (score % 200 === 0) speed++;
+    }
+  }, 100);
+
+  spawnObstacle();
+</script>
+
+</body>
+</html>
