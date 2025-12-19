@@ -1,0 +1,45 @@
+.layer {
+  position: absolute;
+  top: 0;
+  width: 200%;
+  height: 100%;
+  background-repeat: repeat-x;
+}
+
+#bg1 {
+  background: linear-gradient(#111, #222);
+  animation: scroll 20s linear infinite;
+}
+
+#bg2 {
+  background: repeating-linear-gradient(
+    90deg,
+    #333 0,
+    #333 40px,
+    #222 40px,
+    #222 80px
+  );
+  animation: scroll 10s linear infinite;
+}
+
+@keyframes scroll {
+  from { left: 0; }
+  to { left: -100%; }
+}
+<div id="bg1" class="layer"></div>
+<div id="bg2" class="layer"></div>
+.powerup {
+  position: absolute;
+  bottom: 40px;
+  width: 20px;
+  height: 20px;
+  background: cyan;
+  border-radius: 50%;
+}
+
+.shield {
+  box-shadow: 0 0 10px 4px cyan;
+}
+.night {
+  background: #000 !important;
+}
